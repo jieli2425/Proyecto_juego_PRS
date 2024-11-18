@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piedra/Papel/Tijera</title>
+</head>
+<body>
+    <h1>Joc de Pedra, Paper, Tisora</h1>
+
+    <div>
+        <input id="codiPartida" placeholder="Codi de la partida"><br>
+        <button onclick="peticio('POST', 'iniciarJoc')" style="margin-top: 5px;">Iniciar Partida</button>
+        <button onclick="peticio('GET', 'consultarEstatPartida')">Consultar Estat</button>
+        <button onclick="peticio('DELETE', 'acabarJoc')">Acabar Partida</button>
+    </div>
+    <br>
+    <div>
+        <input id="jugador" placeholder="Jugador">
+        <input id="moviment" placeholder="Moviment">
+        <br>
+        <button onclick="moure()" style="margin-top: 5px;">Fer Moviment</button>
+    </div>
+
+</body>
+</html>
