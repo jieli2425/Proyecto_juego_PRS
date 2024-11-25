@@ -1,41 +1,111 @@
 const express = require('express');
 const app = express();
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-app.use(express.urlencoded({extended: true}));
-app.use(express.json())
+// Variables para almacenar datos
+let jugadores = {}; // Almacenar los jugadores por IP
+let partidas = {}; // Almacenar las partidas activas
 
-app.get('/', (req, res)=>res.send('Comienza el juego'));
+// Ruta inicial
+app.get('/', (req, res) => res.send('¡Bienvenido al juego de Piedra, Papel o Tijera!'));
 
-app.get('/api/consultarEstatPartida/codiPartida', (req, res)=>res.send(alumnes));
-app.get('/api/alumnes/:codi', (req, res)=>{
-    let alumne = alumnes.find(a =>a.codi===parseInt(req.params.codi));
-    if (!alumne) res.status(404, 'error');
-    res.send(alumne);
+// Registrar jugador
+app.post('/api/registrar', (req, res) => {
+    const ip = req.ip;
+    const nombre = req.body.nombre;
+
+    if (!nombre) {
+        return res.status(400).send('Falta el nombre del jugador');
+    }
+
+    if (jugadores[ip]) {
+        return res.status(400).send('Ya estás registrado');
+    }
+
+    jugadores[ip] = { nombre, eleccion: null };
+    res.send(`Jugador ${nombre} registrado con éxito desde la IP ${ip}`);
 });
 
-app.post('/api/iniciarJoc/codiPartida', (req, res)=>{
-    console.log('tenemos a tu madre');
-    console.log(req.body.codi);
-    console.log(req.body.nom);
-    alumnes.push({codi:parseInt(req.body.codi), nom: req.body.nom});
-    console.log(alumnes);
-    res.send('tot perfecte');
+// Iniciar una partida entre dos jugadores
+app.post('/api/iniciarPartida', (req, res) => {
+    const jugador1 = req.body.jugador1;
+    const jugador2 = req.body.jugador2;
+
+    if (!jugadores[jugador1] || !jugadores[jugador2]) {
+        return res.status(400).send('Ambos jugadores deben estar registrados');
+    }
+
+    const idPartida = `${jugador1}-${jugador2}`;
+    partidas[idPartida] = { jugador1, jugador2, estado: 'En curso', resultados: null };
+
+    res.send(`Partida iniciada entre ${jugadores[jugador1].nombre} y ${jugadores[jugador2].nombre}`);
 });
 
-app.delete('/api//acabarJoc/codiPartida', (req, res)=>{
-    let alumne = alumnes.find(a =>a.codi===parseInt(req.params.codi));
-    let pos = alumne.indexOf(alumne);
-    alumne.splice(pos, 1);
-    //splice modifica y slice crea una nueva matriz
-    res.send('borrado');
+// Realizar una jugada
+app.post('/api/jugar', (req, res) => {
+    const ip = req.ip;
+    const eleccion = req.body.eleccion;
+
+    if (!['piedra', 'papel', 'tijera'].includes(eleccion)) {
+        return res.status(400).send('Elección inválida');
+    }
+
+    if (!jugadores[ip]) {
+        return res.status(400).send('No estás registrado');
+    }
+
+    jugadores[ip].eleccion = eleccion;
+    res.send(`Has elegido ${eleccion}`);
 });
 
-app.put('/app//moureJugador/codiPartida/jugador/tipusMoviment', (req, res)=>{
-    let alumne = alumnes.find(a =>a.codi===parseInt(req.params.codi));
-    alumne.codi = parseInt(req.body.codi);
-    alumne.nom = req.body.nom;
-    res.send('mamon cambiado');
-})
+// Evaluar resultado
+app.get('/api/resultados/:idPartida', (req, res) => {
+    const idPartida = req.params.idPartida;
+    const partida = partidas[idPartida];
 
-app.listen(3000, ()=>console.log('inici servidor'));
+    if (!partida) {
+        return res.status(404).send('Partida no encontrada');
+    }
+
+    const { jugador1, jugador2 } = partida;
+    const eleccion1 = jugadores[jugador1]?.eleccion;
+    const eleccion2 = jugadores[jugador2]?.eleccion;
+
+    if (!eleccion1 || !eleccion2) {
+        return res.send('Esperando elecciones de ambos jugadores');
+    }
+
+    let resultado;
+
+    if (eleccion1 === eleccion2) {
+        resultado = 'Empate';
+    } else if (
+        (eleccion1 === 'piedra' && eleccion2 === 'tijera') ||
+        (eleccion1 === 'papel' && eleccion2 === 'piedra') ||
+        (eleccion1 === 'tijera' && eleccion2 === 'papel')
+    ) {
+        resultado = `${jugadores[jugador1].nombre} gana`;
+    } else {
+        resultado = `${jugadores[jugador2].nombre} gana`;
+    }
+
+    partida.resultados = resultado;
+    res.send(resultado);
+});
+
+// Eliminar partida
+app.delete('/api/acabarPartida/:idPartida', (req, res) => {
+    const idPartida = req.params.idPartida;
+
+    if (!partidas[idPartida]) {
+        return res.status(404).send('Partida no encontrada');
+    }
+
+    delete partidas[idPartida];
+    res.send('Partida eliminada con éxito');
+});
+
+// Iniciar servidor
+app.listen(3000, () => console.log('Servidor iniciado en el puerto 3000'));
