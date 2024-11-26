@@ -10,9 +10,15 @@
     <h1>Juego de Piedra, Papel o Tijera</h1>
 
     <div id="registro">
-        <h3>Unirse o crear partida</h3>
+        <h3>Jugador 1: Crear partida</h3>
+        <input id="jugador1" placeholder="Tu nombre (jugador 1)" required><br>
+        <button onclick="crearPartida()">Crear partida</button>
+    </div>
+
+    <div id="unirse">
+        <h3>Jugador 2: Unirse a partida</h3>
         <input id="idPartida" placeholder="Código de la partida" required><br>
-        <input id="jugador" placeholder="Tu nombre (jugador)" required><br>
+        <input id="jugador2" placeholder="Tu nombre (jugador 2)" required><br>
         <button onclick="unirse()">Unirse a partida</button>
     </div>
 

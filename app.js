@@ -91,7 +91,7 @@ app.delete('/api/acabarJoc/:idPartida', (req, res) => {
     res.send('Partida eliminada con éxito');
 });
 
-// Configuración para escuchar en la IP `172.20.17.147`
+// Configuración para escuchar en la IP 172.20.17.147
 app.listen(3000,  () => {
     console.log('Servidor iniciado en http://172.20.17.189:3000');
 });
