@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // Crear o acceder a una partida
-app.post('/api/juego', (req, res) => {
+app.post('/api/iniciarJoc/:idPartida', (req, res) => {
     const { idPartida, jugador } = req.body;
 
     if (!idPartida || !jugador) {
@@ -42,8 +42,8 @@ app.post('/api/juego', (req, res) => {
 });
 
 // Realizar movimiento
-app.put('/api/mover', (req, res) => {
-    const { idPartida, jugador, eleccion } = req.body;
+app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
+    const { idPartida, jugador, eleccion } = req.params;
 
     if (!['piedra', 'papel', 'tijera'].includes(eleccion)) {
         return res.status(400).send('Movimiento inválido');
@@ -66,7 +66,7 @@ app.put('/api/mover', (req, res) => {
 });
 
 // Consultar estado de la partida
-app.get('/api/estado/:idPartida', (req, res) => {
+app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
     const { idPartida } = req.params;
     const partida = partidas[idPartida];
 
@@ -83,7 +83,7 @@ function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2) {
 }
 
 // Finalizar partida
-app.delete('/api/acabarPartida/:idPartida', (req, res) => {
+app.delete('/api/acabarJoc/:idPartida', (req, res) => {
     const idPartida = req.params.idPartida;
     if (!partidas[idPartida]) return res.status(404).send('Partida no encontrada');
 
@@ -92,6 +92,6 @@ app.delete('/api/acabarPartida/:idPartida', (req, res) => {
 });
 
 // Configuración para escuchar en la IP `172.20.17.147`
-app.listen(3000, '172.20.17.189', () => {
+app.listen(3000,  () => {
     console.log('Servidor iniciado en http://172.20.17.189:3000');
 });

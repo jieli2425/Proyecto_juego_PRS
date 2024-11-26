@@ -4,18 +4,22 @@ function unirse() {
     const idPartida = document.getElementById('idPartida').value;
     const jugador = document.getElementById('jugador').value;
 
+
     fetch(`${baseUrl}/api/juego`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idPartida, jugador })
     })
-        .then(response => response.text())
-        .then(data => {
-            alert(data);
+    .then(response => response.text())
+    .then(data => {
+        alert(data);
+
+        if (data.includes('Partida creada') || data.includes('Jugador 2 registrado')) {
             document.getElementById('registro').style.display = 'none';
             document.getElementById('juego').style.display = 'block';
-        })
-        .catch(error => console.error('Error:', error));
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function mover() {
