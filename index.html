@@ -1,26 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Piedra/Papel/Tijera</title>
+    <script src="./juego.js"></script>
 </head>
 <body>
-    <h1>Joc de Pedra, Paper, Tisora</h1>
+    <h1>Juego de Piedra, Papel o Tijera</h1>
 
     <div>
-        <input id="codiPartida" placeholder="Codi de la partida"><br>
-        <button onclick="peticio('POST', 'iniciarJoc')" style="margin-top: 5px;">Iniciar Partida</button>
-        <button onclick="peticio('GET', 'consultarEstatPartida')">Consultar Estat</button>
-        <button onclick="peticio('DELETE', 'acabarJoc')">Acabar Partida</button>
+        <h3>Registrar Jugador</h3>
+        <input id="nombre" placeholder="Nombre del jugador" required><br>
+        <button onclick="registrarJugador()">Registrar</button>
     </div>
+
     <br>
+    
     <div>
-        <input id="jugador" placeholder="Jugador">
-        <input id="moviment" placeholder="Moviment">
-        <br>
-        <button onclick="moure()" style="margin-top: 5px;">Fer Moviment</button>
+        <h3>Iniciar Partida</h3>
+        <input id="jugador1" placeholder="Jugador 1 (nombre registrado)" required><br>
+        <input id="jugador2" placeholder="Jugador 2 (nombre registrado)" required><br>
+        <button onclick="iniciarPartida()">Iniciar Partida</button>
     </div>
 
+    <br>
+
+    <div>
+        <h3>Movimientos</h3>
+        <input id="codiPartida" placeholder="Código de la partida (jugador1-jugador2)" required><br>
+        <input id="jugador" placeholder="Tu nombre (jugador)" required><br>
+        <input id="moviment" placeholder="Movimiento (piedra, papel, tijera)" required><br>
+        <button onclick="mover()">Realizar Movimiento</button>
+    </div>
+
+    <br>
+
+    <div>
+        <h3>Consultar Resultados</h3>
+        <input id="codiPartida" placeholder="Código de la partida" required><br>
+        <button onclick="consultarResultados()">Consultar Resultados</button>
+    </div>
+
+    <br>
+
+    <div>
+        <h3>Finalizar Partida</h3>
+        <input id="codiPartida" placeholder="Código de la partida" required><br>
+        <button onclick="acabarPartida()">Finalizar Partida</button>
+    </div>
 </body>
 </html>
