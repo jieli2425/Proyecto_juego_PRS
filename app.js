@@ -1,99 +1,86 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Opciones de movimientos
 let options = {
     piedra: { piedra: "draw", papel: "defeat", tijera: "victory" },
     papel: { papel: "draw", tijera: "defeat", piedra: "victory" },
     tijera: { tijera: "draw", piedra: "defeat", papel: "victory" }
 };
 
-function evaluarResultado(eleccion1, eleccion2) {
-    if (eleccion1 === eleccion2) return "Empate";
-    return options[eleccion1][eleccion2] === "victory" ? "¡Ganaste!" : "Perdiste";
-}
+let partidas = {}; // { idPartida: { jugador1, jugador2, eleccion1, eleccion2, estado } }
 
-let jugadores = {}; // { nombre: { eleccion: null } }
-let partidas = {}; // { idPartida: { jugador1, jugador2, estado, resultados } }
-
-app.get('/', (req, res) => res.send('¡Bienvenido al juego de Piedra, Papel o Tijera!'));
-
-app.get('/api/jugadores', (req, res) => {
-    const listaJugadores = Object.keys(jugadores);
-    if (listaJugadores.length === 0) {
-        return res.send('No hay jugadores registrados');
-    }
-    res.json({ jugadores: listaJugadores });
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Consultar resultados
-app.get('/api/resultados/:idPartida', (req, res) => {
-    const idPartida = req.params.idPartida;
-    const partida = partidas[idPartida];
+// Crear o acceder a una partida
+app.post('/api/juego', (req, res) => {
+    const { idPartida, jugador } = req.body;
 
-    if (!partida) return res.status(404).send('Partida no encontrada');
-
-    const { jugador1, jugador2 } = partida;
-    const eleccion1 = jugadores[jugador1].eleccion;
-    const eleccion2 = jugadores[jugador2].eleccion;
-
-    if (!eleccion1 || !eleccion2) {
-        return res.send('Esperando elecciones de ambos jugadores');
+    if (!idPartida || !jugador) {
+        return res.status(400).send('Faltan datos: idPartida o jugador');
     }
 
-    const resultado = evaluarResultado(eleccion1, eleccion2);
-    partida.resultados = resultado;
-    res.send(resultado);
-});
-
-// Registrar jugador
-app.post('/api/registrar', (req, res) => {
-    const { nombre } = req.body;
-
-    if (!nombre) return res.status(400).send('Falta el nombre del jugador');
-    if (jugadores[nombre]) return res.status(400).send('El nombre ya está registrado');
-
-    jugadores[nombre] = { eleccion: null };
-
-    const response = Object.keys(jugadores).map(jugador => ({ jugadores: jugador }));
-
-    res.json(response);
-});
-
-// Iniciar partida
-app.post('/api/iniciarJoc', (req, res) => {
-    const { jugador1, jugador2 } = req.body;
-
-    if (!jugadores[jugador1] || !jugadores[jugador2]) {
-        return res.status(400).send('Ambos jugadores deben estar registrados');
+    if (!partidas[idPartida]) {
+        // Crear partida
+        partidas[idPartida] = { jugador1: jugador, jugador2: null, eleccion1: null, eleccion2: null, estado: 'esperando' };
+        return res.send('Partida creada. Esperando jugador 2.');
     }
 
-    const idPartida = `${jugador1}-${jugador2}`;
-    partidas[idPartida] = { jugador1, jugador2, estado: 'En curso', resultados: null };
+    if (partidas[idPartida].jugador2 === null) {
+        partidas[idPartida].jugador2 = jugador;
+        partidas[idPartida].estado = 'en curso';
+        return res.send('Jugador 2 registrado. ¡Comienza el juego!');
+    }
 
-    res.send(`Partida iniciada entre ${jugador1} y ${jugador2}`);
+    return res.status(400).send('La partida ya está completa');
 });
 
 // Realizar movimiento
 app.put('/api/mover', (req, res) => {
-    const { codiPartida, jugador, tipusMoviment } = req.body;
+    const { idPartida, jugador, eleccion } = req.body;
 
-    const partida = partidas[codiPartida];
-    if (!partida) return res.status(404).send('Partida no encontrada');
-
-    if (jugador !== partida.jugador1 && jugador !== partida.jugador2) {
-        return res.status(400).send('El jugador no pertenece a esta partida');
-    }
-
-    if (!['piedra', 'papel', 'tijera'].includes(tipusMoviment)) {
+    if (!['piedra', 'papel', 'tijera'].includes(eleccion)) {
         return res.status(400).send('Movimiento inválido');
     }
 
-    jugadores[jugador].eleccion = tipusMoviment;
-    res.send(`Jugador ${jugador} ha elegido ${tipusMoviment}`);
+    const partida = partidas[idPartida];
+    if (!partida) return res.status(404).send('Partida no encontrada');
+
+    if (jugador === partida.jugador1) partida.eleccion1 = eleccion;
+    else if (jugador === partida.jugador2) partida.eleccion2 = eleccion;
+    else return res.status(400).send('Jugador no pertenece a esta partida');
+
+    if (partida.eleccion1 && partida.eleccion2) {
+        const resultado = evaluarResultado(partida.eleccion1, partida.eleccion2, partida.jugador1, partida.jugador2);
+        partida.estado = resultado;
+        return res.send(`Resultado: ${resultado}`);
+    }
+
+    res.send('Esperando al otro jugador...');
 });
+
+// Consultar estado de la partida
+app.get('/api/estado/:idPartida', (req, res) => {
+    const { idPartida } = req.params;
+    const partida = partidas[idPartida];
+
+    if (!partida) return res.status(404).send('Partida no encontrada');
+
+    res.json({ estado: partida.estado, jugador1: partida.jugador1, jugador2: partida.jugador2 });
+});
+
+// Función para evaluar resultados
+function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2) {
+    const resultado = options[eleccion1][eleccion2];
+    if (resultado === "draw") return "Empate";
+    return resultado === "victory" ? `${jugador1} gana` : `${jugador2} gana`;
+}
 
 // Finalizar partida
 app.delete('/api/acabarPartida/:idPartida', (req, res) => {

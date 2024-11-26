@@ -9,40 +9,23 @@
 <body>
     <h1>Juego de Piedra, Papel o Tijera</h1>
 
-    <div>
-        <h3>Registrar Jugador</h3>
-        <input id="nombre" placeholder="Nombre del jugador" required><br>
-        <button onclick="registrarJugador()">Registrar</button>
-    </div>
-
-    <br>
-    
-    <div>
-        <h3>Iniciar Partida</h3>
-        <input id="jugador1" placeholder="Jugador 1 (nombre registrado)" required><br>
-        <input id="jugador2" placeholder="Jugador 2 (nombre registrado)" required><br>
-        <button onclick="iniciarPartida()">Iniciar Partida</button>
-    </div>
-
-    <br>
-
-    <div>
-        <h3>Movimientos</h3>
-        <input id="codiPartida" placeholder="Código de la partida (jugador1-jugador2)" required><br>
+    <div id="registro">
+        <h3>Unirse o crear partida</h3>
+        <input id="idPartida" placeholder="Código de la partida" required><br>
         <input id="jugador" placeholder="Tu nombre (jugador)" required><br>
-        <input id="moviment" placeholder="Movimiento (piedra, papel, tijera)" required><br>
+        <button onclick="unirse()">Unirse a partida</button>
+    </div>
+
+    <div id="juego" style="display: none;">
+        <h3>Realizar movimiento</h3>
+        <input id="movimiento" placeholder="piedra, papel o tijera" required><br>
         <button onclick="mover()">Realizar Movimiento</button>
     </div>
 
-    <br>
-
     <div>
-        <h3>Consultar Resultados</h3>
-        <input id="codiPartida" placeholder="Código de la partida" required><br>
-        <button onclick="consultarResultados()">Consultar Resultados</button>
+        <h3>Consultar estado</h3>
+        <button onclick="consultarEstado()">Estado de la partida</button>
     </div>
-
-    <br>
 
     <div>
         <h3>Finalizar Partida</h3>
