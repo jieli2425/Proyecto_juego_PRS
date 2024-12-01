@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piedra, Papel o Tijera</title>
+    <script src="./juego.js"></script>
+</head>
+<body>
+    <h1>Piedra, Papel o Tijera</h1>
+
+    <div id="seleccionJugador">
+        <h2>Selecciona tu rol</h2>
+        <button onclick="mostrarFormulario('jugador1')">Jugador 1: Crear Partida</button>
+        <button onclick="mostrarFormulario('jugador2')">Jugador 2: Unirse a Partida</button>
+    </div>
+
+    <div id="formJugador1" style="display:none;">
+        <h3>Crear Partida (Jugador 1)</h3>
+        <input id="codigoPartidaInput" placeholder="Ingresa código de la partida" required><br>
+        <button onclick="crearPartida()">Crear Partida</button>
+        <div id="codigoPartida1" style="display:none;">
+            <h4>Código de la partida:</h4>
+            <p id="codigoGenerado"></p>
+        </div>
+    </div>
+
+    <div id="formJugador2" style="display:none;">
+        <h3>Unirse a Partida (Jugador 2)</h3>
+        <input id="codigoPartida" placeholder="Código de la partida" required><br>
+        <button onclick="unirsePartida()">Unirse</button>
+    </div>
+
+    <div id="juego" style="display:none;">
+        <h3>Realizar Movimiento</h3>
+        <button onclick="realizarMovimiento('piedra')">Piedra</button>
+        <button onclick="realizarMovimiento('papel')">Papel</button>
+        <button onclick="realizarMovimiento('tijera')">Tijera</button>
+    </div>
+
+    <div id="eleccionJugador1"></div>
+    <div id="eleccionJugador2"></div>
+
+    <div>
+        <h3>Consultar Estado</h3>
+        <button onclick="consultarEstado()">Estado de la Partida</button>
+    </div>
+
+    <div>
+        <h3>Finalizar Partida</h3>
+        <button onclick="acabarPartida()">Finalizar</button>
+    </div>
+</body>
+</html>
