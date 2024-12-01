@@ -36,11 +36,13 @@ function crearPartida() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('codigoPartida1').style.display = 'block';
-            document.getElementById('codigoGenerado').textContent = idPartida;
+            document.getElementById('codigoGenerado').innerHTML = idPartida;
 
             document.getElementById('formJugador1').style.display = 'none';
             document.getElementById('juego').style.display = 'block';
             jugadorActivo = 'jugador1';
+
+            document.getElementById('jugadorActivo').innerHTML = 'Jugador 1';
         })
         .catch(error => console.error('Error:', error));
 }
@@ -74,6 +76,8 @@ function unirsePartida() {
                 document.getElementById('formJugador2').style.display = 'none';
                 document.getElementById('juego').style.display = 'block';
                 jugadorActivo = 'jugador2';
+
+                document.getElementById('jugadorActivo').innerHTML = 'Jugador 2';
             }
         })
         .catch(error => {
