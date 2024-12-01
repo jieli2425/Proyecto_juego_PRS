@@ -7,10 +7,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Opciones de movimientos
-let options = {
-    piedra: { piedra: "draw", papel: "defeat", tijera: "victory" },
-    papel: { papel: "draw", tijera: "defeat", piedra: "victory" },
-    tijera: { tijera: "draw", piedra: "defeat", papel: "victory" }
+let opciones = {
+    piedra: { piedra: "empate", papel: "perdido", tijera: "victoria" },
+    papel: { papel: "empate", tijera: "perdido", piedra: "victoria" },
+    tijera: { tijera: "empate", piedra: "perdido", papel: "victoria" }
 };
 
 let partidas = {}; // { idPartida: { jugador1, jugador2, eleccion1, eleccion2, estado } }
@@ -99,9 +99,9 @@ app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
 
 // Función para evaluar resultados
 function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2) {
-    const resultado = options[eleccion1][eleccion2];
-    if (resultado === "draw") return "Empate";
-    return resultado === "victory" ? `${jugador1} gana` : `${jugador2} gana`;
+    const resultado = opciones[eleccion1][eleccion2];
+    if (resultado === "empate") return "Empate";
+    return resultado === "victoria" ? `${jugador1} gana` : `${jugador2} gana`;
 }
 
 // Finalizar partida

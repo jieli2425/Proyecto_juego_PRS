@@ -10,9 +10,9 @@
     <h1>Piedra, Papel o Tijera</h1>
 
     <div id="seleccionJugador">
-        <h2>Selecciona tu rol</h2>
+        <h2>Selecciona jugador</h2>
         <button onclick="mostrarFormulario('jugador1')">Jugador 1: Crear Partida</button><br><br>
-        <button onclick="mostrarFormulario('jugador2')">Jugador 2: Unirse a Partida</button>
+        <button onclick="mostrarFormulario('jugador2')">Jugador 2: Unirse Partida</button>
     </div>
 
     <div id="formJugador1" style="display:none;">
@@ -26,7 +26,7 @@
     </div>
 
     <div id="formJugador2" style="display:none;">
-        <h3>Unirse a Partida (Jugador 2)</h3>
+        <h3>Unirse Partida (Jugador 2)</h3>
         <input id="codigoPartida" placeholder="Código de la partida" required><br>
         <button onclick="unirsePartida()">Unirse</button>
     </div>
@@ -36,6 +36,9 @@
         <button onclick="realizarMovimiento('piedra')">Piedra</button>
         <button onclick="realizarMovimiento('papel')">Papel</button>
         <button onclick="realizarMovimiento('tijera')">Tijera</button>
+
+        <br><br>
+        <button onclick="nuevaeleccion()">Volver a Selección de Jugador</button>
     </div>
 
     <div>

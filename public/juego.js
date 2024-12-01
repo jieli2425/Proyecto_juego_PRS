@@ -11,6 +11,13 @@ function mostrarFormulario(jugador) {
     }
 }
 
+function nuevaeleccion() {
+    document.getElementById('juego').style.display = 'none';
+    document.getElementById('seleccionJugador').style.display = 'block';
+    jugadorActivo = '';
+    idPartida = '';
+}
+
 function crearPartida() {
     idPartida = document.getElementById('codigoPartidaInput').value.trim();
 
