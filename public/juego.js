@@ -15,8 +15,10 @@ function crearPartida() {
     idPartida = document.getElementById('codigoPartidaInput').value.trim();
 
     if (!idPartida || isNaN(idPartida)) {
-        alert('Por favor ingresa un código numérico válido.');
+        alert('Por favor ingresa un código válido.');
         return;
+    }else{
+        alert('Partida creado con exito');
     }
 
     fetch(`${baseUrl}/api/iniciarJoc/${idPartida}`, {
@@ -53,16 +55,19 @@ function unirsePartida() {
             if (!response.ok) {
                 return response.json().then(errorData => {
                     alert(errorData.error || 'Error al unirse a la partida');
-                    throw new Error(errorData.error || 'Error desconocido');
+                    document.getElementById('juego').style.display = 'none';
+                    return;
                 });
             }
             return response.json();
         })
         .then(data => {
-            alert('Jugador 2 se ha unido a la partida.');
-            document.getElementById('formJugador2').style.display = 'none';
-            document.getElementById('juego').style.display = 'block';
-            jugadorActivo = 'jugador2';
+            if (data){
+                alert('Jugador 2 se ha unido a la partida.');
+                document.getElementById('formJugador2').style.display = 'none';
+                document.getElementById('juego').style.display = 'block';
+                jugadorActivo = 'jugador2';
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -75,6 +80,11 @@ function realizarMovimiento(eleccion) {
     })
         .then(response => response.text())
         .then(data => {
+            if (data.includes('No es tu turno')) {
+                alert(data);
+                return;
+            }
+
             alert(data);
         })
         .catch(error => console.error('Error:', error));
