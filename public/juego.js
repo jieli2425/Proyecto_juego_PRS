@@ -1,4 +1,4 @@
-const baseUrl = 'http://192.168.1.181:3000';
+const baseUrl = 'http://172.20.18.31:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
@@ -113,6 +113,13 @@ function acabarPartida() {
         method: 'DELETE'
     })
         .then(response => response.text())
-        .then(data => alert(data))
+        .then(data => {
+            alert(data);
+            // Volver a la selección de jugador
+            document.getElementById('juego').style.display = 'none';
+            document.getElementById('seleccionJugador').style.display = 'block';
+            jugadorActivo = '';
+            idPartida = '';
+        })
         .catch(error => console.error('Error:', error));
 }
