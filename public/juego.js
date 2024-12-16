@@ -1,4 +1,4 @@
-const baseUrl = 'http://172.20.18.31:3000';
+const baseUrl = 'http://172.20.18.10:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
@@ -11,21 +11,37 @@ function mostrarFormulario(jugador) {
     }
 }
 
-function nuevaeleccion() {
-    document.getElementById('juego').style.display = 'none';
+
+function reiniciarInterfaz() {
+    // Mostrar la selección de jugador
     document.getElementById('seleccionJugador').style.display = 'block';
+
+    // Ocultar los formularios y secciones del juego
+    document.getElementById('formJugador1').style.display = 'none';
+    document.getElementById('formJugador2').style.display = 'none';
+    document.getElementById('juego').style.display = 'none';
+    document.getElementById('codigoPartida1').style.display = 'none';
+    document.getElementById('menuPartida').style.display = 'none'; // Ocultar menú de partida
+
+    // Limpiar textos dinámicos
+    document.getElementById('codigoGenerado').innerHTML = '';
+    document.getElementById('jugadorActivo').innerHTML = 'Jugador:';
+
+    // Reiniciar variables globales
     jugadorActivo = '';
     idPartida = '';
 }
-
+function nuevaeleccion() {
+    reiniciarInterfaz(); // Reutiliza la función para garantizar consistencia
+}
 function crearPartida() {
     idPartida = document.getElementById('codigoPartidaInput').value.trim();
 
     if (!idPartida || isNaN(idPartida)) {
         alert('Por favor ingresa un código válido.');
         return;
-    }else{
-        alert('Partida creado con exito');
+    } else {
+        alert('Partida creada con éxito');
     }
 
     fetch(`${baseUrl}/api/iniciarJoc/${idPartida}`, {
@@ -43,6 +59,9 @@ function crearPartida() {
             jugadorActivo = 'jugador1';
 
             document.getElementById('jugadorActivo').innerHTML = 'Jugador 1';
+
+            // Mostrar el menú de la partida
+            document.getElementById('menuPartida').style.display = 'block';
         })
         .catch(error => console.error('Error:', error));
 }
@@ -71,13 +90,16 @@ function unirsePartida() {
             return response.json();
         })
         .then(data => {
-            if (data){
+            if (data) {
                 alert('Jugador 2 se ha unido a la partida.');
                 document.getElementById('formJugador2').style.display = 'none';
                 document.getElementById('juego').style.display = 'block';
                 jugadorActivo = 'jugador2';
 
                 document.getElementById('jugadorActivo').innerHTML = 'Jugador 2';
+
+                // Mostrar el menú de la partida
+                document.getElementById('menuPartida').style.display = 'block';
             }
         })
         .catch(error => {
@@ -101,6 +123,7 @@ function realizarMovimiento(eleccion) {
         .catch(error => console.error('Error:', error));
 }
 
+
 function consultarEstado() {
     fetch(`${baseUrl}/api/consultarEstatPartida/${idPartida}`)
         .then(response => response.json())
@@ -115,11 +138,9 @@ function acabarPartida() {
         .then(response => response.text())
         .then(data => {
             alert(data);
-            // Volver a la selección de jugador
-            document.getElementById('juego').style.display = 'none';
-            document.getElementById('seleccionJugador').style.display = 'block';
-            jugadorActivo = '';
-            idPartida = '';
+
+            // Reinicia la interfaz al estado inicial
+            reiniciarInterfaz();
         })
         .catch(error => console.error('Error:', error));
 }
