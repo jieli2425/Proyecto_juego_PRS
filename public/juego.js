@@ -1,4 +1,4 @@
-const baseUrl = 'http://172.20.18.10:3000';
+const baseUrl = 'http://172.20.17.46:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
