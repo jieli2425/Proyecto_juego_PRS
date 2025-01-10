@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="./juego.js"></script>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
+
 <body>
     <h1>Piedra, Papel o Tijera</h1>
 
@@ -49,7 +51,12 @@
         <button onclick="realizarMovimiento('papel')">Papel ✋🏻</button>
         <button onclick="realizarMovimiento('tijera')">Tijera ✌🏻</button>
 
-        <br><br>
+        <div id="resultado"
+            style="display:none; background-color: white; border: 1px solid white; padding: 5px; margin-top: 10px;">
+            <h4>Resultado:</h4>
+            <p id="mensajeResultado"></p>
+        </div>
+        
         <button onclick="nuevaeleccion()"> 🔙 Volver a Selección de Jugador</button>
     </div>
 
@@ -62,4 +69,5 @@
         <button onclick="acabarPartida()">Finalizar 🏁</button>
     </div>
 </body>
+
 </html>

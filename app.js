@@ -13,7 +13,7 @@ let opciones = {
     tijera: { tijera: "empate", piedra: "perdido", papel: "victoria" }
 };
 
-let partidas = {}; // { idPartida: { jugador1, jugador2, eleccion1, eleccion2, estado } }
+let partidas = {}; // { idPartida: { jugador1, jugador2, eleccion1, eleccion2, estado} }
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -116,5 +116,5 @@ app.delete('/api/acabarJoc/:idPartida', (req, res) => {
 
 // Configuración para escuchar en la IP 172.20.17.147
 app.listen(3000, () => {
-    console.log('Servidor iniciado en http://172.20.16.83:3000');
+    console.log('Servidor iniciado en http://192.168.1.199:3000');
 });

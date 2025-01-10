@@ -1,4 +1,4 @@
-const baseUrl = 'http://172.20.16.83:3000';
+const baseUrl = 'http://192.168.1.199:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
@@ -21,7 +21,7 @@ function reiniciarInterfaz() {
     document.getElementById('formJugador2').style.display = 'none';
     document.getElementById('juego').style.display = 'none';
     document.getElementById('codigoPartida1').style.display = 'none';
-    document.getElementById('menuPartida').style.display = 'none'; // Ocultar menú de partida
+    document.getElementById('menuPartida').style.display = 'none';
 
     // Limpiar textos dinámicos
     document.getElementById('codigoGenerado').innerHTML = '';
@@ -30,9 +30,12 @@ function reiniciarInterfaz() {
     // Reiniciar variables globales
     jugadorActivo = '';
     idPartida = '';
+
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('mensajeResultado').innerText = '';
 }
 function nuevaeleccion() {
-    reiniciarInterfaz(); // Reutiliza la función para garantizar consistencia
+    reiniciarInterfaz();
 }
 function crearPartida() {
     idPartida = document.getElementById('codigoPartidaInput').value.trim();
@@ -113,12 +116,9 @@ function realizarMovimiento(eleccion) {
     })
         .then(response => response.text())
         .then(data => {
-            if (data.includes('No es tu turno')) {
-                alert(data);
-                return;
-            }
-
-            alert(data);
+            // Si el mensaje incluye 'No es tu turno' o algún error, muestra el mensaje en el cuadro pequeño
+            document.getElementById('resultado').style.display = 'block';
+            document.getElementById('mensajeResultado').innerText = data;
         })
         .catch(error => console.error('Error:', error));
 }
@@ -127,7 +127,10 @@ function realizarMovimiento(eleccion) {
 function consultarEstado() {
     fetch(`${baseUrl}/api/consultarEstatPartida/${idPartida}`)
         .then(response => response.json())
-        .then(data => alert(`Estado: ${data.estado}`))
+        .then(data => {
+            document.getElementById('resultado').style.display = 'block';
+            document.getElementById('mensajeResultado').innerText = `Estado: ${data.estado}`;
+        })
         .catch(error => console.error('Error:', error));
 }
 
@@ -137,9 +140,9 @@ function acabarPartida() {
     })
         .then(response => response.text())
         .then(data => {
-            alert(data);
-
-            // Reinicia la interfaz al estado inicial
+            document.getElementById('resultado').style.display = 'block';
+            document.getElementById('mensajeResultado').innerText = data;
+            
             reiniciarInterfaz();
         })
         .catch(error => console.error('Error:', error));
