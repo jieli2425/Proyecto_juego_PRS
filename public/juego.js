@@ -23,13 +23,14 @@ function reiniciarInterfaz() {
     document.getElementById('codigoPartida1').style.display = 'none';
     document.getElementById('menuPartida').style.display = 'none';
 
+
     // Limpiar textos dinámicos
     document.getElementById('codigoGenerado').innerHTML = '';
     document.getElementById('jugadorActivo').innerHTML = 'Jugador:';
 
     // Reiniciar variables globales
-    jugadorActivo = '';
-    idPartida = '';
+    jugadorActivo = null;
+    idPartida = null;
 
     document.getElementById('resultado').style.display = 'none';
     document.getElementById('mensajeResultado').innerText = '';
@@ -55,7 +56,7 @@ function crearPartida() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('codigoPartida1').style.display = 'block';
-            document.getElementById('codigoGenerado').innerHTML = idPartida;
+            document.getElementById('codigoGenerado').innerHTML = `${idPartida}`;
 
             document.getElementById('formJugador1').style.display = 'none';
             document.getElementById('juego').style.display = 'block';
@@ -119,6 +120,12 @@ function realizarMovimiento(eleccion) {
             // Si el mensaje incluye 'No es tu turno' o algún error, muestra el mensaje en el cuadro pequeño
             document.getElementById('resultado').style.display = 'block';
             document.getElementById('mensajeResultado').innerText = data;
+
+            if (data.includes('Juego terminado')) {
+                setTimeout(reiniciarInterfaz(), 3000); // Esperar 3 segundos antes de reiniciar
+            } else {
+                consultarEstado(); // Actualizar el estado si el juego continúa
+            }
         })
         .catch(error => console.error('Error:', error));
 }
@@ -129,7 +136,11 @@ function consultarEstado() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('resultado').style.display = 'block';
-            document.getElementById('mensajeResultado').innerText = `Estado: ${data.estado}`;
+            document.getElementById('mensajeResultado').innerText = `Estado: ${data.estado}\nVictorias Jugador 1: ${data.victorias1}\nVictorias Jugador 2: ${data.victorias2}`;
+            if (data.estado.includes('Juego terminado')) {
+                document.getElementById('resultado').style.display = 'block';
+                document.getElementById('mensajeResultado').innerText = data.estado;
+            }
         })
         .catch(error => console.error('Error:', error));
 }
@@ -142,7 +153,7 @@ function acabarPartida() {
         .then(data => {
             document.getElementById('resultado').style.display = 'block';
             document.getElementById('mensajeResultado').innerText = data;
-            
+
             reiniciarInterfaz();
         })
         .catch(error => console.error('Error:', error));

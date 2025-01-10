@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -13,7 +13,7 @@ let opciones = {
     tijera: { tijera: "empate", piedra: "perdido", papel: "victoria" }
 };
 
-let partidas = {}; // { idPartida: { jugador1, jugador2, eleccion1, eleccion2, estado} }
+let partidas = {}; // { idPartida: { jugador1, jugador2, victorias1, victorias2, eleccion1, eleccion2, estado } }
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -33,6 +33,8 @@ app.post('/api/iniciarJoc/:idPartida', (req, res) => {
             partidas[idPartida] = {
                 jugador1: jugador,
                 jugador2: null,
+                victorias1: 0,
+                victorias2: 0,
                 eleccion1: null,
                 eleccion2: null,
                 estado: 'esperando',
@@ -75,13 +77,22 @@ app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     partida.turno = jugador === 'jugador1' ? 'jugador2' : 'jugador1';
 
     if (partida.eleccion1 && partida.eleccion2) {
-        const resultado = evaluarResultado(partida.eleccion1, partida.eleccion2, partida.jugador1, partida.jugador2);
+        const resultado = evaluarResultado(partida.eleccion1, partida.eleccion2, partida.jugador1, partida.jugador2, idPartida);
         partida.estado = resultado;
+
+        // Comprobar si algún jugador ha llegado a 3 victorias
+        if (partida.victorias1 === 3) {
+            partida.estado = `${partida.jugador1} ha ganado 3 partidas. Fin`;
+            return res.send(partida.estado);
+        } else if (partida.victorias2 === 3) {
+            partida.estado = `${partida.jugador2} ha ganado 3 partidas. Fin`;
+            return res.send(partida.estado);
+        }
 
         partida.eleccion1 = null;
         partida.eleccion2 = null;
 
-        return res.send(`Resultado: ${resultado}. ¡Selecciona otra opción!`);
+        return res.send(`Resultado: ${resultado}. ¡Elije!`);
     }
 
     res.send('Esperando al otro jugador...');
@@ -94,14 +105,21 @@ app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
 
     if (!partida) return res.status(404).send('Partida no encontrada');
 
-    res.json({ estado: partida.estado, jugador1: partida.jugador1, jugador2: partida.jugador2 });
+    res.json({ estado: partida.estado, victorias1: partida.victorias1, victorias2: partida.victorias2 });
 });
 
 // Función para evaluar resultados
-function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2) {
+function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida) {
     const resultado = opciones[eleccion1][eleccion2];
     if (resultado === "empate") return "Empate";
-    return resultado === "victoria" ? `${jugador1} gana` : `${jugador2} gana`;
+
+    if (resultado === "victoria") {
+        partidas[idPartida].victorias1++;
+        return `${jugador1} gana`;
+    } else {
+        partidas[idPartida].victorias2++;
+        return `${jugador2} gana`;
+    }
 }
 
 // Finalizar partida
@@ -114,6 +132,21 @@ app.delete('/api/acabarJoc/:idPartida', (req, res) => {
     res.send('Partida eliminada con éxito');
 });
 
+// Reiniciar la partida
+function reiniciarPartida(idPartida) {
+    if (partidas[idPartida]) {
+        // Reiniciar las victorias y el estado de la partida
+        partidas[idPartida].victorias1 = 0;
+        partidas[idPartida].victorias2 = 0;
+        partidas[idPartida].estado = 'esperando';
+        partidas[idPartida].eleccion1 = null;
+        partidas[idPartida].eleccion2 = null;
+        partidas[idPartida].turno = 'jugador1';
+
+        // Borrar los jugadores y reiniciar el estado
+        delete partidas[idPartida];
+    }
+}
 // Configuración para escuchar en la IP 172.20.17.147
 app.listen(3000, () => {
     console.log('Servidor iniciado en http://192.168.1.199:3000');
