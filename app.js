@@ -6,26 +6,26 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Opciones de movimientos
+// Opciones
 let opciones = {
     piedra: { piedra: "empate", papel: "perdido", tijera: "victoria" },
     papel: { papel: "empate", tijera: "perdido", piedra: "victoria" },
     tijera: { tijera: "empate", piedra: "perdido", papel: "victoria" }
 };
 
-let partidas = {}; // { idPartida: { jugador1, jugador2, victorias1, victorias2, eleccion1, eleccion2, estado } }
+let partidas = {}; // informacion de los jugadores y victorias
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Crear o acceder a una partida
+// crear/unir partida
 app.post('/api/iniciarJoc/:idPartida', (req, res) => {
     const { idPartida } = req.params;
     const { jugador } = req.body;
 
     if (!idPartida || !jugador) {
-        return res.status(400).json({ error: 'Faltan datos: idPartida o jugador' });
+        return res.status(400).json({ error: 'Faltan datos: ID o jugador' });
     }
 
     if (!partidas[idPartida]) {
@@ -40,22 +40,30 @@ app.post('/api/iniciarJoc/:idPartida', (req, res) => {
                 estado: 'esperando',
                 turno: 'jugador1'
             };
-            return res.json({ idPartida: idPartida, mensaje: 'Partida creada. Esperando jugador 2.' });
+            return res.json({ idPartida: idPartida, mensaje: 'Partido creado. Esperando jugador 2.' });
         } else {
-            return res.status(404).json({ error: 'Partida no encontrada' });
+            return res.status(404).json({ error: 'Partido no encontrado' });
         }
     }
 
     if (partidas[idPartida].jugador2 === null && jugador === 'jugador2') {
         partidas[idPartida].jugador2 = jugador;
         partidas[idPartida].estado = 'en curso';
-        return res.json({ idPartida: idPartida, mensaje: 'Jugador 2 registrado. ¡Comienza el juego!' });
+        return res.json({ idPartida: idPartida, mensaje: 'Jugador 2 unido. ¡Comienza la partida!' });
     }
 
-    return res.status(400).json({ error: 'La partida ya está completa o no puedes unirte como este jugador' });
+    return res.status(400).json({ error: 'El partido esta lleno' });
 });
 
-// Realizar movimiento
+function reiniciarPartida(idPartida) {
+    if (partidas[idPartida]) {
+        partidas[idPartida].estado = 'finalizado';
+
+        delete partidas[idPartida];
+    }
+}
+
+// realizar movimiento
 app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     const { idPartida, jugador, eleccion } = req.params;
 
@@ -64,10 +72,10 @@ app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     }
 
     const partida = partidas[idPartida];
-    if (!partida) return res.status(404).send('Partida no encontrada');
+    if (!partida) return res.status(404).send('Partido no encontrado');
 
     if (jugador !== partida.turno) {
-        return res.status(400).send('No es tu turno. Espera a que el jugador1 haga su elección.');
+        return res.status(400).send('No es tu turno. Espera a que el jugador1 elija.');
     }
 
     if (jugador === partida.jugador1) partida.eleccion1 = eleccion;
@@ -77,39 +85,38 @@ app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     partida.turno = jugador === 'jugador1' ? 'jugador2' : 'jugador1';
 
     if (partida.eleccion1 && partida.eleccion2) {
-        const resultado = evaluarResultado(partida.eleccion1, partida.eleccion2, partida.jugador1, partida.jugador2, idPartida);
+        const resultado = comprobarResultado(partida.eleccion1, partida.eleccion2, partida.jugador1, partida.jugador2, idPartida);
         partida.estado = resultado;
 
-        // Comprobar si algún jugador ha llegado a 3 victorias
         if (partida.victorias1 === 3) {
-            partida.estado = `${partida.jugador1} ha ganado 3 partidas. Fin`;
-            return res.send(partida.estado);
+            reiniciarPartida(idPartida);
+            return res.send(`${partida.jugador1} ha ganado 3 partidas. ¡El partido ha finalizado!`);
         } else if (partida.victorias2 === 3) {
-            partida.estado = `${partida.jugador2} ha ganado 3 partidas. Fin`;
-            return res.send(partida.estado);
+            reiniciarPartida(idPartida);
+            return res.send(`${partida.jugador2} ha ganado 3 partidas. ¡El partido ha finalizado!`);
         }
 
         partida.eleccion1 = null;
         partida.eleccion2 = null;
 
-        return res.send(`Resultado: ${resultado}. ¡Elije!`);
+        return res.send(`Resultado: ${resultado}. Elije`);
     }
 
-    res.send('Esperando al otro jugador...');
+    res.send('Esperando al jugador...');
 });
 
-// Consultar estado de la partida
+// consultar partida
 app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
     const { idPartida } = req.params;
     const partida = partidas[idPartida];
 
-    if (!partida) return res.status(404).send('Partida no encontrada');
+    if (!partida) return res.status(404).send('Partido no encontrado');
 
     res.json({ estado: partida.estado, victorias1: partida.victorias1, victorias2: partida.victorias2 });
 });
 
-// Función para evaluar resultados
-function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida) {
+// comprobar resultado
+function comprobarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida) {
     const resultado = opciones[eleccion1][eleccion2];
     if (resultado === "empate") return "Empate";
 
@@ -126,28 +133,12 @@ function evaluarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida) {
 app.delete('/api/acabarJoc/:idPartida', (req, res) => {
     const { idPartida } = req.params;
 
-    if (!partidas[idPartida]) return res.status(404).send('Partida con el ID no ha encontrada');
+    if (!partidas[idPartida]) return res.status(404).send('El ID del partido no ha sido encontrado');
 
     delete partidas[idPartida];
-    res.send('Partida eliminada con éxito');
+    res.send('Partido eliminado con éxito');
 });
 
-// Reiniciar la partida
-function reiniciarPartida(idPartida) {
-    if (partidas[idPartida]) {
-        // Reiniciar las victorias y el estado de la partida
-        partidas[idPartida].victorias1 = 0;
-        partidas[idPartida].victorias2 = 0;
-        partidas[idPartida].estado = 'esperando';
-        partidas[idPartida].eleccion1 = null;
-        partidas[idPartida].eleccion2 = null;
-        partidas[idPartida].turno = 'jugador1';
-
-        // Borrar los jugadores y reiniciar el estado
-        delete partidas[idPartida];
-    }
-}
-// Configuración para escuchar en la IP 172.20.17.147
 app.listen(3000, () => {
-    console.log('Servidor iniciado en http://192.168.1.199:3000');
+    console.log('Servidor iniciado en http://172.20.17.208:3000');
 });

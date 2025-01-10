@@ -1,4 +1,4 @@
-const baseUrl = 'http://192.168.1.199:3000';
+const baseUrl = 'http://172.20.17.208:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
@@ -13,10 +13,8 @@ function mostrarFormulario(jugador) {
 
 
 function reiniciarInterfaz() {
-    // Mostrar la selección de jugador
     document.getElementById('seleccionJugador').style.display = 'block';
 
-    // Ocultar los formularios y secciones del juego
     document.getElementById('formJugador1').style.display = 'none';
     document.getElementById('formJugador2').style.display = 'none';
     document.getElementById('juego').style.display = 'none';
@@ -24,28 +22,28 @@ function reiniciarInterfaz() {
     document.getElementById('menuPartida').style.display = 'none';
 
 
-    // Limpiar textos dinámicos
     document.getElementById('codigoGenerado').innerHTML = '';
     document.getElementById('jugadorActivo').innerHTML = 'Jugador:';
 
-    // Reiniciar variables globales
     jugadorActivo = null;
     idPartida = null;
 
     document.getElementById('resultado').style.display = 'none';
     document.getElementById('mensajeResultado').innerText = '';
 }
+
 function nuevaeleccion() {
     reiniciarInterfaz();
 }
+
 function crearPartida() {
     idPartida = document.getElementById('codigoPartidaInput').value.trim();
 
     if (!idPartida || isNaN(idPartida)) {
-        alert('Por favor ingresa un código válido.');
+        alert('Introduce una ID correcta.');
         return;
     } else {
-        alert('Partida creada con éxito');
+        alert('Partido creado correctamente');
     }
 
     fetch(`${baseUrl}/api/iniciarJoc/${idPartida}`, {
@@ -64,7 +62,6 @@ function crearPartida() {
 
             document.getElementById('jugadorActivo').innerHTML = 'Jugador 1';
 
-            // Mostrar el menú de la partida
             document.getElementById('menuPartida').style.display = 'block';
         })
         .catch(error => console.error('Error:', error));
@@ -74,7 +71,7 @@ function unirsePartida() {
     idPartida = document.getElementById('codigoPartida').value.trim();
 
     if (!idPartida || isNaN(idPartida)) {
-        alert('Por favor ingresa un código de partida válido.');
+        alert('Introduce una ID correcta.');
         return;
     }
 
@@ -86,7 +83,7 @@ function unirsePartida() {
         .then(response => {
             if (!response.ok) {
                 return response.json().then(errorData => {
-                    alert(errorData.error || 'Error al unirse a la partida');
+                    alert(errorData.error || 'No se ha podido unir');
                     document.getElementById('juego').style.display = 'none';
                     return;
                 });
@@ -95,14 +92,13 @@ function unirsePartida() {
         })
         .then(data => {
             if (data) {
-                alert('Jugador 2 se ha unido a la partida.');
+                alert('Jugador 2 se ha unido al partido.');
                 document.getElementById('formJugador2').style.display = 'none';
                 document.getElementById('juego').style.display = 'block';
                 jugadorActivo = 'jugador2';
 
                 document.getElementById('jugadorActivo').innerHTML = 'Jugador 2';
 
-                // Mostrar el menú de la partida
                 document.getElementById('menuPartida').style.display = 'block';
             }
         })
@@ -117,15 +113,12 @@ function realizarMovimiento(eleccion) {
     })
         .then(response => response.text())
         .then(data => {
-            // Si el mensaje incluye 'No es tu turno' o algún error, muestra el mensaje en el cuadro pequeño
             document.getElementById('resultado').style.display = 'block';
             document.getElementById('mensajeResultado').innerText = data;
 
-            if (data.includes('Juego terminado')) {
-                setTimeout(reiniciarInterfaz(), 3000); // Esperar 3 segundos antes de reiniciar
-            } else {
-                consultarEstado(); // Actualizar el estado si el juego continúa
-            }
+            setTimeout(() => {
+                consultarEstado(); 
+            }, 500);
         })
         .catch(error => console.error('Error:', error));
 }
@@ -140,6 +133,15 @@ function consultarEstado() {
             if (data.estado.includes('Juego terminado')) {
                 document.getElementById('resultado').style.display = 'block';
                 document.getElementById('mensajeResultado').innerText = data.estado;
+
+                if (data.estado === 'finalizado') {
+                    document.getElementById('resultado').style.display = 'block';
+                    if (data.victorias1 === 3) {
+                        document.getElementById('mensajeResultado').innerText = `${data.jugador1} ha ganado 3 partidas. ¡La partida ha finalizado!`;
+                    } else if (data.victorias2 === 3) {
+                        document.getElementById('mensajeResultado').innerText = `${data.jugador2} ha ganado 3 partidas. ¡La partida ha finalizado!`;
+                    }
+                }
             }
         })
         .catch(error => console.error('Error:', error));
