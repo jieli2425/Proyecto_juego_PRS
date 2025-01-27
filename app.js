@@ -6,20 +6,18 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Opciones
 let opciones = {
     piedra: { piedra: "empate", papel: "perdido", tijera: "victoria" },
     papel: { papel: "empate", tijera: "perdido", piedra: "victoria" },
     tijera: { tijera: "empate", piedra: "perdido", papel: "victoria" }
 };
 
-let partidas = {}; // informacion de los jugadores y victorias
+let partidas = {};
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// crear/unir partida
 app.post('/api/iniciarJoc/:idPartida', (req, res) => {
     const { idPartida } = req.params;
     const { jugador } = req.body;
@@ -63,7 +61,6 @@ function reiniciarPartida(idPartida) {
     }
 }
 
-// realizar movimiento
 app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     const { idPartida, jugador, eleccion } = req.params;
 
@@ -105,7 +102,6 @@ app.put('/api/moureJugador/:idPartida/:jugador/:eleccion', (req, res) => {
     res.send('Esperando al jugador...');
 });
 
-// consultar partida
 app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
     const { idPartida } = req.params;
     const partida = partidas[idPartida];
@@ -115,7 +111,6 @@ app.get('/api/consultarEstatPartida/:idPartida', (req, res) => {
     res.json({ estado: partida.estado, victorias1: partida.victorias1, victorias2: partida.victorias2 });
 });
 
-// comprobar resultado
 function comprobarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida) {
     const resultado = opciones[eleccion1][eleccion2];
     if (resultado === "empate") return "Empate";
@@ -129,7 +124,6 @@ function comprobarResultado(eleccion1, eleccion2, jugador1, jugador2, idPartida)
     }
 }
 
-// Finalizar partida
 app.delete('/api/acabarJoc/:idPartida', (req, res) => {
     const { idPartida } = req.params;
 
