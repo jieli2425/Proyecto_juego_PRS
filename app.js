@@ -134,5 +134,5 @@ app.delete('/api/acabarJoc/:idPartida', (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Servidor iniciado en http://172.20.17.208:3000');
+    console.log('Servidor iniciado en http://172.20.16.152:3000');
 });
