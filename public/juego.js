@@ -1,4 +1,4 @@
-const baseUrl = 'http://172.20.16.152:3000';
+const baseUrl = 'http://172.20.17.173:3000';
 let jugadorActivo = '';
 let idPartida = '';
 
@@ -10,7 +10,6 @@ function mostrarFormulario(jugador) {
         document.getElementById('formJugador2').style.display = 'block';
     }
 }
-
 
 function reiniciarInterfaz() {
     document.getElementById('seleccionJugador').style.display = 'block';

@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 
 app.post('/api/iniciarJoc/:idPartida', (req, res) => {
     const { idPartida } = req.params;
+
     const { jugador } = req.body;
 
     if (!idPartida || !jugador) {
@@ -134,5 +135,5 @@ app.delete('/api/acabarJoc/:idPartida', (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Servidor iniciado en http://172.20.16.152:3000');
+    console.log('Servidor iniciado en http://172.20.17.173:3000');
 });
